@@ -5,18 +5,24 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Stopwatch\Stopwatch;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class HomeController extends AbstractController
 {
     /**
      * @Route("/", name="home")
      */
-    public function index(Stopwatch $stopwatch)
+    public function index(Stopwatch $stopwatch, CacheInterface $cache)
     {
         $stopwatch->start('calcul-long');
 
         // On imagine un calcul ou un traitement long
-        $resultatCalcul = $this->fonctionQuiPrendDuTemps();
+        //$resultatCalcul = $this->fonctionQuiPrendDuTemps();
+        $resultatCalcul = $cache->get('resultat-calcul-long', function(ItemInterface $item){
+            $item->expiresAfter(10);
+            return $this->fonctionQuiPrendDuTemps();
+        });
 
         $stopwatch->stop('calcul-long');
 
